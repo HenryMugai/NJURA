@@ -1,12 +1,12 @@
 import uuid
-
 from datetime import datetime
+
 from database.db import db
 
 
 class BaseModel(db.Model):
     """
-    Abstract base model inherited by all database models.
+    Abstract base model inherited by all models.
 
     Provides:
         - Primary Key
@@ -19,6 +19,10 @@ class BaseModel(db.Model):
 
     __abstract__ = True
 
+    # =====================================================
+    # Primary Key
+    # =====================================================
+
     id = db.Column(
         db.Integer,
         primary_key=True
@@ -26,76 +30,93 @@ class BaseModel(db.Model):
 
     uuid = db.Column(
         db.String(36),
-        unique=True,
         nullable=False,
+        unique=True,
         default=lambda: str(uuid.uuid4()),
         index=True
     )
 
+    # =====================================================
+    # Record Status
+    # =====================================================
+
     is_active = db.Column(
         db.Boolean,
-        default=True,
-        nullable=False
+        nullable=False,
+        default=True
     )
 
     is_deleted = db.Column(
         db.Boolean,
-        default=False,
-        nullable=False
+        nullable=False,
+        default=False
     )
+
+    # =====================================================
+    # Audit Information
+    # =====================================================
 
     created_at = db.Column(
         db.DateTime,
-        default=datetime.utcnow,
-        nullable=False
+        nullable=False,
+        default=datetime.utcnow
     )
 
     updated_at = db.Column(
         db.DateTime,
+        nullable=False,
         default=datetime.utcnow,
-        onupdate=datetime.utcnow,
-        nullable=False
+        onupdate=datetime.utcnow
     )
+
+    # =====================================================
+    # Helper Methods
+    # =====================================================
+
+    def save(self):
+        """
+        Save the current record.
+        """
+        db.session.add(self)
+        db.session.commit()
 
     def soft_delete(self):
         """
-        Marks a record as deleted without removing it
-        from the database.
+        Soft delete the current record.
         """
         self.is_deleted = True
         self.is_active = False
+        db.session.commit()
 
     def restore(self):
         """
-        Restores a previously soft-deleted record.
+        Restore a soft-deleted record.
         """
         self.is_deleted = False
         self.is_active = True
+        db.session.commit()
+
+    def hard_delete(self):
+        """
+        Permanently remove the record.
+        """
+        db.session.delete(self)
+        db.session.commit()
 
     def to_dict(self):
         """
-        Converts model attributes into a dictionary.
-        Excludes SQLAlchemy internal attributes.
+        Convert the model into a dictionary.
         """
         return {
             column.name: getattr(self, column.name)
             for column in self.__table__.columns
         }
 
-    def save(self):
-        """
-        Saves the current object.
-        """
-        db.session.add(self)
-        db.session.commit()
-
-    def delete(self):
-        """
-        Permanently removes the object from the database.
-        Use with caution.
-        """
-        db.session.delete(self)
-        db.session.commit()
+    # =====================================================
+    # Object Representation
+    # =====================================================
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} {self.id}>"
+        return (
+            f"<{self.__class__.__name__}(id={self.id})>"
+        )

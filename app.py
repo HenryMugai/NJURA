@@ -8,8 +8,15 @@ from database.db import login_manager
 from database.db import bcrypt
 from database.db import limiter
 
+# --------------------------------
+# Import Models
+# --------------------------------
+
+import models
+
 
 def create_app():
+
     app = Flask(__name__)
 
     app.config.from_object(Config)
@@ -32,6 +39,6 @@ def create_app():
     # Register Blueprints
     # --------------------------------
 
-    # Added as we build each module.
+    # Added as modules are built.
 
     return app

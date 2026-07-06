@@ -7,7 +7,8 @@ class Company(BaseModel):
     Represents a tenant (client company) within the
     N.J.U.R.A SaaS platform.
 
-    Every business entity belongs to a company.
+    Every operational record in the system belongs
+    to a company.
     """
 
     __tablename__ = "companies"
@@ -42,22 +43,14 @@ class Company(BaseModel):
         nullable=True
     )
 
-    business_type = db.Column(
-        db.Enum(
-            "Manufacturer",
-            "Distributor",
-            "Wholesaler",
-            "Retailer",
-            "Other",
-            name="business_type_enum"
-        ),
-        nullable=False,
-        default="Manufacturer"
-    )
-
     industry = db.Column(
         db.String(100),
-        nullable=False
+        nullable=True
+    )
+
+    initials = db.Column(
+        db.String(10),
+        nullable=True
     )
 
     # =====================================================
@@ -67,7 +60,8 @@ class Company(BaseModel):
     email = db.Column(
         db.String(120),
         nullable=False,
-        unique=True
+        unique=True,
+        index=True
     )
 
     phone = db.Column(
@@ -124,17 +118,17 @@ class Company(BaseModel):
     # Branding
     # =====================================================
 
-    logo = db.Column(
+    logo_url = db.Column(
         db.String(255),
         nullable=True
     )
 
-    primary_color = db.Column(
+    brand_primary_color = db.Column(
         db.String(20),
         nullable=True
     )
 
-    secondary_color = db.Column(
+    brand_secondary_color = db.Column(
         db.String(20),
         nullable=True
     )
@@ -222,14 +216,37 @@ class Company(BaseModel):
     # Account Status
     # =====================================================
 
+    company_status = db.Column(
+        db.Enum(
+            "Pending",
+            "Active",
+            "Suspended",
+            "Archived",
+            name="company_status_enum"
+        ),
+        nullable=False,
+        default="Pending",
+        index=True
+    )
+
     is_verified = db.Column(
         db.Boolean,
         nullable=False,
         default=False
     )
 
-    last_login_at = db.Column(
-        db.DateTime,
+    onboarding_completed = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False
+    )
+
+    # =====================================================
+    # Internal Notes
+    # =====================================================
+
+    notes = db.Column(
+        db.Text,
         nullable=True
     )
 
@@ -237,8 +254,119 @@ class Company(BaseModel):
     # Relationships
     # =====================================================
 
-    # Relationships will be added after all
-    # models have been completed.
+    subscriptions = db.relationship(
+        "Subscription",
+        back_populates="company",
+        lazy=True
+    )
+
+    users = db.relationship(
+        "User",
+        back_populates="company",
+        lazy=True
+    )
+
+    territories = db.relationship(
+        "Territory",
+        back_populates="company",
+        lazy=True
+    )
+
+    routes = db.relationship(
+        "Route",
+        back_populates="company",
+        lazy=True
+    )
+
+    distributors = db.relationship(
+        "Distributor",
+        back_populates="company",
+        lazy=True
+    )
+
+    outlet_categories = db.relationship(
+        "OutletCategory",
+        back_populates="company",
+        lazy=True
+    )
+
+    outlets = db.relationship(
+        "Outlet",
+        back_populates="company",
+        lazy=True
+    )
+
+    fsrs = db.relationship(
+        "FSR",
+        back_populates="company",
+        lazy=True
+    )
+
+    product_categories = db.relationship(
+        "ProductCategory",
+        back_populates="company",
+        lazy=True
+    )
+
+    products = db.relationship(
+        "Product",
+        back_populates="company",
+        lazy=True
+    )
+
+    product_prices = db.relationship(
+        "ProductPrice",
+        back_populates="company",
+        lazy=True
+    )
+
+    visits = db.relationship(
+        "Visit",
+        back_populates="company",
+        lazy=True
+    )
+
+    visit_notes = db.relationship(
+        "VisitNote",
+        back_populates="company",
+        lazy=True
+    )
+
+    orders = db.relationship(
+        "Order",
+        back_populates="company",
+        lazy=True
+    )
+
+    order_items = db.relationship(
+        "OrderItem",
+        back_populates="company",
+        lazy=True
+    )
+
+    deliveries = db.relationship(
+        "Delivery",
+        back_populates="company",
+        lazy=True
+    )
+
+    dashboards = db.relationship(
+        "Dashboard",
+        back_populates="company",
+        lazy=True
+    )
+
+    notifications = db.relationship(
+        "Notification",
+        back_populates="company",
+        lazy=True
+    )
+
+    audit_logs = db.relationship(
+        "AuditLog",
+        back_populates="company",
+        lazy=True
+    )
 
     # =====================================================
     # Object Representation

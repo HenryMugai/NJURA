@@ -8,9 +8,9 @@ class Subscription(BaseModel):
     """
     Stores subscription information for each company.
 
-    One company can only have one active subscription at a time,
-    but historical subscriptions are retained for auditing
-    and reporting purposes.
+    One company can have multiple subscription records
+    over time for historical tracking, but only one
+    should be active at any given time.
     """
 
     __tablename__ = "subscriptions"
@@ -179,26 +179,26 @@ class Subscription(BaseModel):
 
     gps_tracking = db.Column(
         db.Boolean,
-        default=True,
-        nullable=False
+        nullable=False,
+        default=True
     )
 
     analytics_enabled = db.Column(
         db.Boolean,
-        default=True,
-        nullable=False
+        nullable=False,
+        default=True
     )
 
     api_access = db.Column(
         db.Boolean,
-        default=False,
-        nullable=False
+        nullable=False,
+        default=False
     )
 
     offline_mode = db.Column(
         db.Boolean,
-        default=False,
-        nullable=False
+        nullable=False,
+        default=False
     )
 
     # ==========================================
@@ -214,11 +214,21 @@ class Subscription(BaseModel):
     # Relationships
     # ==========================================
 
-    # Added after all models have been completed.
+    company = db.relationship(
+        "Company",
+        back_populates="subscriptions",
+        lazy="joined"
+    )
+
+    # ==========================================
+    # Object Representation
+    # ==========================================
 
     def __repr__(self):
         return (
-            f"<Subscription "
-            f"{self.plan_name} "
-            f"({self.status})>"
+            f"<Subscription("
+            f"id={self.id}, "
+            f"company_id={self.company_id}, "
+            f"plan='{self.plan_name}', "
+            f"status='{self.status}')>"
         )
